@@ -23,8 +23,6 @@ def main():
         server_priv = f.read()
 
 
-
-
     #Server port
     serverPort = 12000
     
