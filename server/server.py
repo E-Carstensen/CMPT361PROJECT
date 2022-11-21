@@ -13,7 +13,7 @@ from Crypto.Cipher import PKCS1_OAEP
 from Crypto.Random import get_random_bytes
 
 
-
+#
 def main():
 
     with open("server_public.pem", "rb") as f:
@@ -25,24 +25,24 @@ def main():
 
     #Server port
     serverPort = 12000
-    
+
     serverSocket = create_socket(serverPort)
-        
+
     #The server can only have one connection in its queue waiting for acceptance
     serverSocket.listen(5)
-        
+
     while 1:
         try:
             #Server accepts client connection
             connectionSocket, addr = serverSocket.accept()
             print(addr,'   ',connectionSocket)
             pid = os.fork()
-            
+
             # If it is a client process
             if  pid== 0:
-                
-                serverSocket.close() 
-                
+
+                serverSocket.close()
+
                 #Main action goes here
                 while 1:
 
@@ -58,16 +58,16 @@ def main():
                        user_pass = json.load(f)
 
                    if (user_name in user_pass and user_pass[user_name] == pswrd):
-                      
+
                        #Get users public key
                        with open(user_name + "_public.pem", "rb") as f:
                            user_pub = f.read()
-                   
+
                        #If match, Create sym_key, encrypt with user public, and send to user
                        sym_key = get_random_bytes(16)
                        connectionSocket.send(pub_encrypt(sym_key, user_pub))
 
-                   #Else send unencrypted “Invalid username or password”, print info, and terminate
+                   #Else send unencrypted ï¿½Invalid username or passwordï¿½, print info, and terminate
                    else:
                        connectionSocket.send("Invalid username or password".encode('ascii'))
                        print("The received clientinformation: [client_username] is invalid (ConnectionTerminated).")
@@ -84,26 +84,26 @@ def main():
 choice: '''
 
 
-                    
+
 
                 connectionSocket.close()
-                
+
                 return
-            
+
             #Parent doesn't need this connection
             connectionSocket.close()
-            
+
         except socket.error as e:
             print('An error occured:',e)
-            serverSocket.close() 
-            sys.exit(1)        
+            serverSocket.close()
+            sys.exit(1)
         except:
             print('Goodbye')
-            serverSocket.close() 
+            serverSocket.close()
             sys.exit(0)
-            
-        
-#Takes a string and returns a symetric encrypted binary 
+
+
+#Takes a string and returns a symetric encrypted binary
 def sym_encrypt(message, key):
     #Generate cipher block
     cipher = AES.new(key, AES.MODE_ECB)
@@ -119,7 +119,7 @@ def sym_decrypt(message, key):
     Encodedmessage = unpad(Padded_message,16)
     return (Encodedmessage.decode('ascii'))
 
-#Takes a string and returns a public encrypted binary 
+#Takes a string and returns a public encrypted binary
 def pub_encrypt(message, key):
     cipher_rsa_en = PKCS1_OAEP.new(key)
     enc_data = cipher_rsa_en.encrypt(message.encode('ascii'))
@@ -134,20 +134,20 @@ def pub_decrypt(message, key):
 
 
 def create_socket(serverPort):
-     #Create server socket that uses IPv4 and TCP protocols 
+     #Create server socket that uses IPv4 and TCP protocols
     try:
         serverSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     except socket.error as e:
         print('Error in server socket creation:',e)
         sys.exit(1)
-    
+
     #Associate 12000 port number to the server socket
     try:
         serverSocket.bind(('', serverPort))
     except socket.error as e:
         print('Error in server socket binding:',e)
-        sys.exit(1)        
-        
+        sys.exit(1)
+
     print('The server is ready to accept connections')
     return serverSocket
 
