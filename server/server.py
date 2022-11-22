@@ -81,16 +81,38 @@ def main():
     2) Display the inbox list
     3) Display the email contents
     4) Terminate the connection
-    choice: '''
+choice: '''
 
-                    print(menu_text)
+                    menu_text_en = sym_encrypt(menu_text, sym_key)
+                    connectionSocket.send(menu_text_en)
 
 
+                    choice_en = connectionSocket.recv(2048)
+                    choice = sym_decrypt(choice_en, sym_key)
+
+                    if (choice == "1"):
+                        pass
+                    elif (choice == "2"):
+                        pass
+                    elif (choice == "3"):
+                        pass
+                    elif (choice == "4"):
+                        pass
+                    else:
+                        pass
+
+
+                    #TEST
+
+
+
+
+
+                #End of main loop, close connection and return
                 connectionSocket.close()
-
                 return
 
-            #Parent doesn't need this connection
+            #Is parent process, close connection, keep serverSocket open
             connectionSocket.close()
 
         except socket.error as e:
@@ -101,6 +123,12 @@ def main():
             print('Goodbye')
             serverSocket.close()
             sys.exit(0)
+
+
+    #End server function, close sockets
+    if pid != 0:
+        serverSocket.close()
+        return
 
 
 #Takes a string and returns a symetric encrypted binary
@@ -119,13 +147,13 @@ def sym_decrypt(message, key):
     Encodedmessage = unpad(Padded_message,16)
     return (Encodedmessage.decode('ascii'))
 
-#Takes a string and returns a public encrypted binary
+#Takes a string and a public key returns a public encrypted binary
 def pub_encrypt(message, key):
     cipher_rsa_en = PKCS1_OAEP.new(key)
     enc_data = cipher_rsa_en.encrypt(message.encode('ascii'))
     return(enc_data)
 
-#Takes a public encrypted binary and returns a Decrypted string
+#Takes a public encrypted binary and a private key and returns a Decrypted string
 def priv_decrypt(message, key):
     cipher_rsa_dec = PKCS1_OAEP.new(key)
     dec_data = cipher_rsa_dec.decrypt(message)
