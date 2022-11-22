@@ -45,45 +45,45 @@ def main():
 
                 #Main action goes here
                 while 1:
+                    #
+                    #Recieve Username and Password
+                    login = connectionSocket.recv(2048)
+                    login = priv_decrypt(login, server_pub)
+                    login = login.split('\n')
+                    user_name = login[0]
+                    pswrd = login[1]
 
-                   #Recieve Username and Password
-                   login = connectionSocket.recv(2048)
-                   login = priv_decrypt(login, server_pub)
-                   login = login.split('\n')
-                   user_name = login[0]
-                   pswrd = login[1]
+                    #Compare against Json
+                    with open("user_pass.json", "r") as f:
+                        user_pass = json.load(f)
 
-                   #Compare against Json
-                   with open("user_pass.json", "r") as f:
-                       user_pass = json.load(f)
 
-                   if (user_name in user_pass and user_pass[user_name] == pswrd):
+                    if (user_name in user_pass and user_pass[user_name] == pswrd):
+                        #Get users public key
+                        with open(user_name + "_public.pem", "rb") as f:
+                            user_pub = f.read()
 
-                       #Get users public key
-                       with open(user_name + "_public.pem", "rb") as f:
-                           user_pub = f.read()
 
-                       #If match, Create sym_key, encrypt with user public, and send to user
-                       sym_key = get_random_bytes(16)
-                       connectionSocket.send(pub_encrypt(sym_key, user_pub))
+                        sym_key = get_random_bytes(16)
+                        connectionSocket.send(pub_encrypt(sym_key, user_pub))
 
                    #Else send unencrypted �Invalid username or password�, print info, and terminate
-                   else:
-                       connectionSocket.send("Invalid username or password".encode('ascii'))
-                       print("The received clientinformation: [client_username] is invalid (ConnectionTerminated).")
-                       connectionSocket.close()
-                       return
+                    else:
+                        connectionSocket.send("Invalid username or password".encode('ascii'))
+                        print("The received clientinformation: [client_username] is invalid (ConnectionTerminated).")
+                        connectionSocket.close()
+                        return
 
 
                    #
-                   menu_text = '''Select the operation:
+                    menu_text = '''Select the operation:
     1) Create and send an email
     2) Display the inbox list
     3) Display the email contents
     4) Terminate the connection
-choice: '''
+    choice: '''
 
-                print(menu_text)
+                    print(menu_text)
 
 
                 connectionSocket.close()
