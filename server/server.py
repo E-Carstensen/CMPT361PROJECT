@@ -16,10 +16,10 @@ from Crypto.Random import get_random_bytes
 #
 def main():
 
-    with open("server_public.pem", "r") as f:
+    with open("keys/server_public.pem", "r") as f:
         server_pub = RSA.import_key(f.read())
 
-    with open("server_private.pem", "r") as f:
+    with open("keys/server_private.pem", "r") as f:
         server_priv = RSA.import_key(f.read())
 
 
@@ -49,7 +49,6 @@ def main():
                     #Recieve Username and Password
                     login = connectionSocket.recv(2048)
                     login = priv_decrypt(login, server_priv)
-                    print('\nDECRYPTED LOGIN: ', login)
                     login = login.split('\n')
                     user_name = login[0]
                     pswrd = login[1]
@@ -60,9 +59,8 @@ def main():
 
 
                     if (user_name in user_pass and user_pass[user_name] == pswrd):
-                        print("USERNAME PASSES")
                         #Get users public key
-                        with open(user_name + "_public.pem", "rb") as f:
+                        with open("keys/" + user_name + "_public.pem", "rb") as f:
                             user_pub = RSA.import_key(f.read())
 
 

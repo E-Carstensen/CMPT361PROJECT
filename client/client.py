@@ -12,22 +12,18 @@ from Crypto.Random import get_random_bytes
 #test comment
 def client():
 
-    with open("client1_public.pem", "r") as f:
-        client_pub = RSA.import_key(f.read())
-
-
-    with open("client1_private.pem", "r") as f:
-        client_priv = RSA.import_key(f.read())
-
-    with open("server_public.pem", "r") as f:
+    #Read server public key
+    with open("keys/server_public.pem", "r") as f:
         server_pub = RSA.import_key(f.read())
-
-
-
 
     # Server Information
     serverName = '127.0.0.1' #'localhost'
     serverPort = 12020
+
+    temp = input("Enter the server IP or name:")
+    if (len(temp) != 0):
+        serverName = temp
+
 
     #Create client socket that useing IPv4 and TCP protocols
     try:
@@ -40,25 +36,42 @@ def client():
         #Client connect with the server
         connectionSocket.connect((serverName,serverPort))
 
-        #Format, encrypt, and send login info
-        login = "client1\npassword1"
+        #Take, Format, encrypt, and send login info
+        user_name = input("Enter your username: ")
+        password = input("Enter your password: ")
+        login = "\n".join((user_name, password))
         login_en = pub_encrypt(login, server_pub)
         connectionSocket.send(login_en)
 
-
+        #Recieve encrypted symmetric key
         sym_key_en = connectionSocket.recv(2048)
+
+        if (sym_key_en == "Invalid username or password".encode('ascii')):
+            print("Invalid username or password")
+            connectionSocket.close()
+            return
+
+        with open("keys/" + user_name + "_public.pem", "rb") as f:
+            client_pub = RSA.import_key(f.read())
+
+        with open("keys/" + user_name + "_private.pem", "rb") as f:
+            client_priv = RSA.import_key(f.read())
+
+
         sym_key = priv_decrypt(sym_key_en, client_priv, False)
 
-        print("SYM_KEY --- ", sym_key)
+        #Main menu loop
+        while 1:
+            # Client receives a message and send it to the client
+            message = connectionSocket.recv(2048)
+
+            message = sym_decrypt(message, sym_key)
+
+            print(message)
 
 
 
-        # Client receives a message and send it to the client
-        message = connectionSocket.recv(2048)
 
-        message = sym_decrypt(message, sym_key)
-
-        print(message)
 
         # Client terminate connection with the server
         connectionSocket.close()
