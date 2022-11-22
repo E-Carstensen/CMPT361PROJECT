@@ -101,7 +101,35 @@ def priv_decrypt(message, key):
     dec_data = cipher_rsa_dec.decrypt(message)
     return (dec_data.decode('ascii'))
 
+class Email:
+    from_user = str
+    to_user = str
+    date = datetime.datetime
+    title = str
+    content_length = int
+    content = str
 
+    def __init__(self, from_user:str, to_user:str, date:datetime.datetime, title:str, content_length:str, content:str):
+        self.from_user = from_user
+        self.to_user = to_user
+        self.date = date
+        self.title = title
+        self.content_length = content_length
+        self.content = content
+
+    def __str__(self):
+        return f"From: {self.from_user}\nTo: {self.to_user}\nDate: {self.date}\nTitle: {self.title}\nContent Length: {self.content_length}\nContent: {self.content}"
+
+    def __repr__(self):
+        return f"From: {self.from_user}\nTo: {self.to_user}\nDate: {self.date}\nTitle: {self.title}\nContent Length: {self.content_length}\nContent: {self.content}"
+
+    def send_email():
+        # TODO: Get length of the email
+        # TODO: encrypt the length
+        # TODO: send the length
+        # TODO: store email as a string (i.e. self.__str__()) in a variable
+        # TODO: encrypt the email string using the sym_encrypt() function
+        # TODO: send the encrypted email to the server
 
 #----------
 client()
