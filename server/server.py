@@ -48,7 +48,7 @@ def main():
 
                    #Recieve Username and Password
                    login = connectionSocket.recv(2048)
-                   login = pub_decrypt(login, server_pub)
+                   login = priv_decrypt(login, server_pub)
                    login = login.split('\n')
                    user_name = login[0]
                    pswrd = login[1]
@@ -83,7 +83,7 @@ def main():
     4) Terminate the connection
 choice: '''
 
-
+                print(menu_text)
 
 
                 connectionSocket.close()
@@ -126,7 +126,7 @@ def pub_encrypt(message, key):
     return(enc_data)
 
 #Takes a public encrypted binary and returns a Decrypted string
-def pub_decrypt(message, key):
+def priv_decrypt(message, key):
     cipher_rsa_dec = PKCS1_OAEP.new(key)
     dec_data = cipher_rsa_dec.decrypt(message)
     print(dec_data.decode('ascii'))
