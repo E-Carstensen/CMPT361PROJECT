@@ -95,6 +95,9 @@ class Email:
         return f"From: {self.from_user}\nTo: {self.to_user}\nDate: {self.date}\nTitle: {self.title}\nContent Length: {self.content_length}\nContent: {self.content}"
 
     def send_email():
+        # TODO: Get length of the email
+        # TODO: encrypt the length
+        # TODO: send the length
         # TODO: store email as a string (i.e. self.__str__()) in a variable
         # TODO: encrypt the email string using the sym_encrypt() function
         # TODO: send the encrypted email to the server
