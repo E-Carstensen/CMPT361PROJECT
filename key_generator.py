@@ -1,5 +1,5 @@
 #Project 361 group 6, Samuel Brownlee, Eric Carstensen, Simon Gordon, Evan Stewart
-#key generator.py 
+#key generator.py
 
 from Crypto.Cipher import AES
 from Crypto.Random import get_random_bytes
@@ -98,6 +98,3 @@ f.close()
 f = open('client5_private.pem','wb')
 f.write(pri_key_cli5.exportKey('PEM'))
 f.close()
-
-
-
