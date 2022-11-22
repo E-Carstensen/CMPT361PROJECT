@@ -1,0 +1,115 @@
+Skip to content
+Search or jump to…
+Pull requests
+Issues
+Codespaces
+Marketplace
+Explore
+ 
+@stewarte19 
+Legrandin
+/
+pycryptodome
+Public
+Code
+Issues
+70
+Pull requests
+33
+Discussions
+Actions
+Projects
+Wiki
+Security
+Insights
+pycryptodome/.gitignore
+@Legrandin
+Legrandin Update .gitignore with more junk
+Latest commit 895239c on Jan 3, 2021
+ History
+ 4 contributors
+@dlitz@Legrandin@paxan@hannesvn
+65 lines (53 sloc)  767 Bytes
+
+# Ignore these files:
+MANIFEST
+
+# Backup files
+*~
+*.bak
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# PyInstaller
+#  Usually these files are written by a python script from a template
+#  before PyInstaller builds the exe, so as to inject date/other infos into it.
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*,cover
+
+# Translations
+*.mo
+*.pot
+
+# Django stuff:
+*.log
+
+# Sphinx documentation
+/Doc/apidoc/
+/Doc/_build
+
+# PyBuilder
+target/
+
+Footer
+© 2022 GitHub, Inc.
+Footer navigation
+Terms
+Privacy
+Security
+Status
+Docs
+Contact GitHub
+Pricing
+API
+Training
+Blog
+About
+
+# Group Additions
+*.md
