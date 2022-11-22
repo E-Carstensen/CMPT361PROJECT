@@ -24,7 +24,7 @@ def main():
 
 
     #Server port
-    serverPort = 12018
+    serverPort = 12020
 
     serverSocket = create_socket(serverPort)
 
@@ -66,9 +66,9 @@ def main():
                             user_pub = RSA.import_key(f.read())
 
 
-                        sym_key = get_random_bytes(41)
+                        sym_key = get_random_bytes(16)
                         print("SYM_KEY --- ", str(sym_key))
-                        sym_key_en = pub_encrypt(str(sym_key), user_pub)
+                        sym_key_en = pub_encrypt(sym_key, user_pub, False)
                         connectionSocket.send(sym_key_en)
 
                    #Else send unencrypted �Invalid username or password�, print info, and terminate
@@ -136,33 +136,40 @@ choice: '''
 
 
 #Takes a string and returns a symetric encrypted binary
-def sym_encrypt(message, key):
+def sym_encrypt(message, key, string = True):
     #Generate cipher block
     cipher = AES.new(key, AES.MODE_ECB)
     # Encrypt the message
-    ct_bytes = cipher.encrypt(pad(message.encode('ascii'),16))
+    if string:
+        message = message.encode('ascii')
+    ct_bytes = cipher.encrypt(pad(message,16))
     return ct_bytes
 
 #Takes an encrypted binary and returns a Decrypted string
-def sym_decrypt(message, key):
+def sym_decrypt(message, key, string = True):
     cipher = AES.new(key, AES.MODE_ECB)
     Padded_message = cipher.decrypt(message)
     #Remove padding
     Encodedmessage = unpad(Padded_message,16)
-    return (Encodedmessage.decode('ascii'))
+    if string:
+        Encodedmessage = Encodedmessage.decode('ascii')
+    return (Encodedmessage)
 
 #Takes a string and a public key returns a public encrypted binary
-def pub_encrypt(message, key):
+def pub_encrypt(message, key, string = True):
     cipher_rsa_en = PKCS1_OAEP.new(key)
-    enc_data = cipher_rsa_en.encrypt(message.encode('ascii'))
+    if string:
+        message = message.encde('ascii')
+    enc_data = cipher_rsa_en.encrypt(message)
     return(enc_data)
 
 #Takes a public encrypted binary and a private key and returns a Decrypted string
-def priv_decrypt(message, key):
+def priv_decrypt(message, key, string = True):
     cipher_rsa_dec = PKCS1_OAEP.new(key)
     dec_data = cipher_rsa_dec.decrypt(message)
-    return (dec_data.decode('ascii'))
-
+    if string:
+        dec_data = dec_data.decode('ascii')
+    return (dec_data)
 
 
 def create_socket(serverPort):
@@ -182,37 +189,6 @@ def create_socket(serverPort):
 
     print('The server is ready to accept connections')
     return serverSocket
-
-class Email:
-    from_user = str
-    to_user = str
-    date = datetime.datetime
-    title = str
-    content_length = int
-    content = str
-
-    def __init__(self, from_user:str, to_user:str, date:datetime.datetime, title:str, content_length:str, content:str):
-        self.from_user = from_user
-        self.to_user = to_user
-        self.date = date
-        self.title = title
-        self.content_length = content_length
-        self.content = content
-
-    def __str__(self):
-        return f"From: {self.from_user}\nTo: {self.to_user}\nDate: {self.date}\nTitle: {self.title}\nContent Length: {self.content_length}\nContent: {self.content}"
-
-    def __repr__(self):
-        return f"From: {self.from_user}\nTo: {self.to_user}\nDate: {self.date}\nTitle: {self.title}\nContent Length: {self.content_length}\nContent: {self.content}"
-
-    def send_email():
-        # TODO: Get length of the email
-        # TODO: encrypt the length
-        # TODO: send the length
-        # TODO: store email as a string (i.e. self.__str__()) in a variable
-        # TODO: encrypt the email string using the sym_encrypt() function
-        # TODO: send the encrypted email to the server
-
 
 #-------
 main()

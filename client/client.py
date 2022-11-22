@@ -27,7 +27,7 @@ def client():
 
     # Server Information
     serverName = '127.0.0.1' #'localhost'
-    serverPort = 12018
+    serverPort = 12020
 
     #Create client socket that useing IPv4 and TCP protocols
     try:
@@ -47,7 +47,7 @@ def client():
 
 
         sym_key_en = connectionSocket.recv(2048)
-        sym_key = priv_decrypt(sym_key_en, client_priv)
+        sym_key = priv_decrypt(sym_key_en, client_priv, False)
 
         print("SYM_KEY --- ", sym_key)
 
@@ -74,32 +74,40 @@ def client():
 
 
 #Takes a string and returns a symetric encrypted binary
-def sym_encrypt(message, key):
+def sym_encrypt(message, key, string = True):
     #Generate cipher block
     cipher = AES.new(key, AES.MODE_ECB)
     # Encrypt the message
-    ct_bytes = cipher.encrypt(pad(message.encode('ascii'),16))
+    if string:
+        message = message.encode('ascii')
+    ct_bytes = cipher.encrypt(pad(message,16))
     return ct_bytes
 
 #Takes an encrypted binary and returns a Decrypted string
-def sym_decrypt(message, key):
+def sym_decrypt(message, key, string = True):
     cipher = AES.new(key, AES.MODE_ECB)
     Padded_message = cipher.decrypt(message)
     #Remove padding
     Encodedmessage = unpad(Padded_message,16)
-    return (Encodedmessage.decode('ascii'))
+    if string:
+        Encodedmessage = Encodedmessage.decode('ascii')
+    return (Encodedmessage)
 
 #Takes a string and a public key returns a public encrypted binary
-def pub_encrypt(message, key):
+def pub_encrypt(message, key, string = True):
     cipher_rsa_en = PKCS1_OAEP.new(key)
-    enc_data = cipher_rsa_en.encrypt(message.encode('ascii'))
+    if string:
+        message = message.encode('ascii')
+    enc_data = cipher_rsa_en.encrypt(message)
     return(enc_data)
 
 #Takes a public encrypted binary and a private key and returns a Decrypted string
-def priv_decrypt(message, key):
+def priv_decrypt(message, key, string = True):
     cipher_rsa_dec = PKCS1_OAEP.new(key)
     dec_data = cipher_rsa_dec.decrypt(message)
-    return (dec_data.decode('ascii'))
+    if string:
+        dec_data = dec_data.decode('ascii')
+    return (dec_data)
 
 class Email:
     from_user = str
@@ -124,6 +132,7 @@ class Email:
         return f"From: {self.from_user}\nTo: {self.to_user}\nDate: {self.date}\nTitle: {self.title}\nContent Length: {self.content_length}\nContent: {self.content}"
 
     def send_email():
+        pass
         # TODO: Get length of the email
         # TODO: encrypt the length
         # TODO: send the length
