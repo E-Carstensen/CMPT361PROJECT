@@ -11,9 +11,23 @@ from Crypto.Random import get_random_bytes
 
 #test comment
 def client():
+
+    with open("client1_public.pem", "r") as f:
+        client_pub = RSA.import_key(f.read())
+
+
+    with open("client1_private.pem", "r") as f:
+        client_priv = RSA.import_key(f.read())
+
+    with open("server_public.pem", "r") as f:
+        server_pub = RSA.import_key(f.read())
+
+
+
+
     # Server Information
     serverName = '127.0.0.1' #'localhost'
-    serverPort = 12000
+    serverPort = 12018
 
     #Create client socket that useing IPv4 and TCP protocols
     try:
@@ -26,10 +40,25 @@ def client():
         #Client connect with the server
         connectionSocket.connect((serverName,serverPort))
 
+        #Format, encrypt, and send login info
+        login = "client1\npassword1"
+        login_en = pub_encrypt(login, server_pub)
+        connectionSocket.send(login_en)
+
+
+        sym_key_en = connectionSocket.recv(2048)
+        sym_key = priv_decrypt(sym_key_en, client_priv)
+
+        print("SYM_KEY --- ", sym_key)
+
+
+
         # Client receives a message and send it to the client
         message = connectionSocket.recv(2048)
 
-        message = priv_decrypt(message, )
+        message = sym_decrypt(message, sym_key)
+
+        print(message)
 
         # Client terminate connection with the server
         connectionSocket.close()
@@ -70,7 +99,7 @@ def pub_encrypt(message, key):
 def priv_decrypt(message, key):
     cipher_rsa_dec = PKCS1_OAEP.new(key)
     dec_data = cipher_rsa_dec.decrypt(message)
-    print(dec_data.decode('ascii'))
+    return (dec_data.decode('ascii'))
 
 
 

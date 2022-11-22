@@ -16,15 +16,15 @@ from Crypto.Random import get_random_bytes
 #
 def main():
 
-    with open("server_public.pem", "rb") as f:
-        server_pub = f.read()
+    with open("server_public.pem", "r") as f:
+        server_pub = RSA.import_key(f.read())
 
-    with open("server_private.pem", "rb") as f:
-        server_priv = f.read()
+    with open("server_private.pem", "r") as f:
+        server_priv = RSA.import_key(f.read())
 
 
     #Server port
-    serverPort = 12000
+    serverPort = 12018
 
     serverSocket = create_socket(serverPort)
 
@@ -48,7 +48,8 @@ def main():
                     #
                     #Recieve Username and Password
                     login = connectionSocket.recv(2048)
-                    login = priv_decrypt(login, server_pub)
+                    login = priv_decrypt(login, server_priv)
+                    print('\nDECRYPTED LOGIN: ', login)
                     login = login.split('\n')
                     user_name = login[0]
                     pswrd = login[1]
@@ -59,13 +60,16 @@ def main():
 
 
                     if (user_name in user_pass and user_pass[user_name] == pswrd):
+                        print("USERNAME PASSES")
                         #Get users public key
                         with open(user_name + "_public.pem", "rb") as f:
-                            user_pub = f.read()
+                            user_pub = RSA.import_key(f.read())
 
 
-                        sym_key = get_random_bytes(16)
-                        connectionSocket.send(pub_encrypt(sym_key, user_pub))
+                        sym_key = get_random_bytes(41)
+                        print("SYM_KEY --- ", str(sym_key))
+                        sym_key_en = pub_encrypt(str(sym_key), user_pub)
+                        connectionSocket.send(sym_key_en)
 
                    #Else send unencrypted �Invalid username or password�, print info, and terminate
                     else:
@@ -157,7 +161,7 @@ def pub_encrypt(message, key):
 def priv_decrypt(message, key):
     cipher_rsa_dec = PKCS1_OAEP.new(key)
     dec_data = cipher_rsa_dec.decrypt(message)
-    print(dec_data.decode('ascii'))
+    return (dec_data.decode('ascii'))
 
 
 
