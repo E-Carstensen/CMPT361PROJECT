@@ -25,7 +25,7 @@ def main():
 
 
     #Server port
-    serverPort = 12046
+    serverPort = 12047
 
     serverSocket = create_socket(serverPort)
 
@@ -189,37 +189,35 @@ def create_socket(serverPort):
 
 #Recieves email from client and creates Email class object from data
 def send_email(sym_key, connectionSocket):
+
+    #Recieve expected size or entire encrypted email
     size = connectionSocket.recv(2048)
     size = sym_decrypt(size, sym_key)
-
-    print("EXPECTED SIZE: ", size)
 
     #Recieve formatted email string
     data = connectionSocket.recv(2048)
 
+    #While size of data recieved is less than expected, recieve more data
     while (len(data) < int(size)):
         data += connectionSocket.recv(2048)
 
-    print("RECIEVED SIZE: ", str(len(data)))
-
-    #Decrypt
+    #Decrypt recieved data to string
     header = sym_decrypt(data, sym_key)
-    print(header)
-
     #Split string on \n character
     header_split = header.split('\n')
 
     #Create new email object based on hard coded order in header string
     email = Email()
-    email.date = datetime.datetime.now()
     email.from_user = header_split[0][6:]
     email.to_user = header_split[1][4:]
     email.title = header_split[3][7:]
     #Dont have to send length with whole email - Maybe send before
-    email.content_length = header_split[4][16:]
+    email.content_length = size
 
-    email.content = header_split[5][9:]
+    email.content = ''.join(header_split[5:])[9:]
 
+    #Add recieved date and time
+    email.date = datetime.datetime.now()
 
 
     print(str(email))
