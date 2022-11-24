@@ -18,7 +18,7 @@ def client():
 
     # Server Information
     serverName = '127.0.0.1' #'localhost'
-    serverPort = 12041
+    serverPort = 12043
 
     temp = input("Enter the server IP or name:")
     if (len(temp) != 0):
@@ -80,8 +80,9 @@ def client():
 
             if choice == "1":
                 email = create_email(user_name)
+                connectionSocket.sendall(sym_encrypt(str(email), sym_key))
                 print(str(email))
-                
+
             if choice == "2":
                 pass
             if choice == "3":

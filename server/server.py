@@ -25,7 +25,7 @@ def main():
 
 
     #Server port
-    serverPort = 12041
+    serverPort = 12043
 
     serverSocket = create_socket(serverPort)
 
@@ -190,30 +190,39 @@ def create_socket(serverPort):
 #Recieves email from client and creates Email class object from data
 def send_email(sym_key, connectionSocket):
 
+    #Recieve formatted email string
     data = connectionSocket.recv(2048)
 
+    #Decrypt
     header = sym_decrypt(data, sym_key)
     print(header)
 
+    #Split string on \n character
     header_split = header.split('\n')
+
+    #Create new email object based on hard coded order in header string
     email = Email()
     email.date = datetime.datetime.now()
     email.from_user = header_split[0][6:]
     email.to_user = header_split[1][4:]
     email.title = header_split[3][7:]
-    #Dont have to send length with whole email
+    #Dont have to send length with whole email - Maybe send before
     email.content_length = header_split[4][16:]
 
-    data = connectionSocket.recv(2048)
-    while (len(data) < int(email.content_length)):
+    email.content = header_split[5][9:]
+
+    #While len of recieved content does not match expected, recieve data
+    while (len(email.content) < int(email.content_length)):
         print(len(data), int(email.content_length))
-        data += connectionSocket.recv(2048)
-    message = sym_decrypt(data, sym_key)
-    email.content = message
+        data += connectionSocket.recv(128)
+        email.content += sym_decrypt(data, sym_key)
+    #message = sym_decrypt(data, sym_key)
+    #email.content = message
 
 
 
     print(str(email))
+    return email
 
 class Email:
     from_user = str
