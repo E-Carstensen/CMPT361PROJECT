@@ -187,6 +187,7 @@ def create_socket(serverPort):
     print('The server is ready to accept connections')
     return serverSocket
 
+#Recieves email from client and creates Email class object from data
 def send_email(sym_key, connectionSocket):
 
     data = connectionSocket.recv(2048)
@@ -200,6 +201,7 @@ def send_email(sym_key, connectionSocket):
     email.from_user = header_split[0][6:]
     email.to_user = header_split[1][4:]
     email.title = header_split[3][7:]
+    #Dont have to send length with whole email
     email.content_length = header_split[4][16:]
 
     data = connectionSocket.recv(2048)

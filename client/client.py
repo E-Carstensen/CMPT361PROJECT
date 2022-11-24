@@ -81,14 +81,7 @@ def client():
             if choice == "1":
                 email = create_email(user_name)
                 print(str(email))
-                body = str(email).split('Content: ')[1]
-                body_en = sym_encrypt(body, sym_key)
-                email.content_length = len(body_en)
-                header = str(email).split("Content: ")[0]
-                header_en = sym_encrypt(header, sym_key)
-                connectionSocket.send(header_en)
-                connectionSocket.sendall(body_en)
-                print("sent")
+                
             if choice == "2":
                 pass
             if choice == "3":
@@ -151,6 +144,7 @@ def priv_decrypt(message, key, string = True):
         dec_data = dec_data.decode('ascii')
     return (dec_data)
 
+#Returns Email class item with variable filled
 def create_email(sender):
 
     email = Email()
