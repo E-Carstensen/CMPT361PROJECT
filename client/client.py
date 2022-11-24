@@ -18,7 +18,7 @@ def client():
 
     # Server Information
     serverName = '127.0.0.1' #'localhost'
-    serverPort = 12020
+    serverPort = 12041
 
     temp = input("Enter the server IP or name:")
     if (len(temp) != 0):
@@ -39,6 +39,13 @@ def client():
         #Take, Format, encrypt, and send login info
         user_name = input("Enter your username: ")
         password = input("Enter your password: ")
+
+        debug = True #DEBUG -Change before demo
+        if (debug):
+            user_name = 'client1'
+            password = 'password1'
+
+
         login = "\n".join((user_name, password))
         login_en = pub_encrypt(login, server_pub)
         connectionSocket.send(login_en)
@@ -63,11 +70,33 @@ def client():
         #Main menu loop
         while 1:
             # Client receives a message and send it to the client
-            message = connectionSocket.recv(2048)
+            menu_text_en = connectionSocket.recv(2048)
+            menu_text = sym_decrypt(menu_text_en, sym_key)
+            choice = input(menu_text)
+            while (choice not in ["1", "2", "3", "4"]):
+                choice = input("Invalid input\n" + menu_text)
+            choice_en = sym_encrypt(choice, sym_key)
+            connectionSocket.send(choice_en)
 
-            message = sym_decrypt(message, sym_key)
+            if choice == "1":
+                email = create_email(user_name)
+                print(str(email))
+                body = str(email).split('Content: ')[1]
+                body_en = sym_encrypt(body, sym_key)
+                email.content_length = len(body_en)
+                header = str(email).split("Content: ")[0]
+                header_en = sym_encrypt(header, sym_key)
+                connectionSocket.send(header_en)
+                connectionSocket.sendall(body_en)
+                print("sent")
+            if choice == "2":
+                pass
+            if choice == "3":
+                pass
+            if choice == "4":
+                pass
 
-            print(message)
+
 
 
 
@@ -122,6 +151,36 @@ def priv_decrypt(message, key, string = True):
         dec_data = dec_data.decode('ascii')
     return (dec_data)
 
+def create_email(sender):
+
+    email = Email()
+
+    email.from_user = sender
+    email.to_user = input("Enter destinations (separated by ;): ")
+    email.title = input("Enter title: ")
+    load_file = input("Would you like to load contents from a file?(Y/N) ")
+    while (load_file.lower() != 'n' and load_file.lower() != "y"):
+        load_file = input("Would you like to load contents from a file?(Y/N) ")
+
+    if (load_file.lower() == 'n'):
+        email.content = input("Enter message contents: ")
+    else:
+        file_name = input("Enter filename: ")
+        try:
+            with open(sender + "/" + file_name, 'r') as f:
+                email.content = f.read()
+        except:
+            print("Invailid File Name")
+            return
+
+    email.content_length = len(email.content)
+
+    return email
+
+
+
+
+
 class Email:
     from_user = str
     to_user = str
@@ -129,14 +188,15 @@ class Email:
     title = str
     content_length = int
     content = str
-
-    def __init__(self, from_user:str, to_user:str, date:datetime.datetime, title:str, content_length:str, content:str):
-        self.from_user = from_user
-        self.to_user = to_user
-        self.date = date
-        self.title = title
-        self.content_length = content_length
-        self.content = content
+# from_user:str, to_user:str, date:datetime.datetime, title:str, content_length:str, content:str
+    def __init__(self):
+        #self.from_user = from_user
+        #self.to_user = to_user
+        #self.date = date
+        #self.title = title
+        #self.content_length = content_length
+        #self.content = content
+        pass
 
     def __str__(self):
         return f"From: {self.from_user}\nTo: {self.to_user}\nDate: {self.date}\nTitle: {self.title}\nContent Length: {self.content_length}\nContent: {self.content}"
