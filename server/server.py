@@ -16,6 +16,7 @@ from Crypto.Random import get_random_bytes
 #
 def main():
 
+
     with open("keys/server_public.pem", "r") as f:
         server_pub = RSA.import_key(f.read())
 
@@ -24,7 +25,7 @@ def main():
 
 
     #Server port
-    serverPort = 12020
+    serverPort = 12041
 
     serverSocket = create_socket(serverPort)
 
@@ -35,7 +36,7 @@ def main():
         try:
             #Server accepts client connection
             connectionSocket, addr = serverSocket.accept()
-            print(addr,'   ',connectionSocket)
+            #print(addr,'   ',connectionSocket)
             pid = os.fork()
 
             # If it is a client process
@@ -43,57 +44,60 @@ def main():
 
                 serverSocket.close()
 
-                #Main action goes here
-                while 1:
-                    #
-                    #Recieve Username and Password
-                    login = connectionSocket.recv(2048)
-                    login = priv_decrypt(login, server_priv)
-                    login = login.split('\n')
-                    user_name = login[0]
-                    pswrd = login[1]
+                #Recieve Username and Password
+                login = connectionSocket.recv(2048)
+                login = priv_decrypt(login, server_priv)
+                login = login.split('\n')
+                user_name = login[0]
+                pswrd = login[1]
 
-                    #Compare against Json
-                    with open("user_pass.json", "r") as f:
-                        user_pass = json.load(f)
+                #Compare against Json
+                with open("user_pass.json", "r") as f:
+                    user_pass = json.load(f)
 
+                #Compare given user_name and password with json file
+                if (user_name in user_pass and user_pass[user_name] == pswrd):
+                    #Get users public key
+                    with open("keys/" + user_name + "_public.pem", "rb") as f:
+                        user_pub = RSA.import_key(f.read())
 
-                    if (user_name in user_pass and user_pass[user_name] == pswrd):
-                        #Get users public key
-                        with open("keys/" + user_name + "_public.pem", "rb") as f:
-                            user_pub = RSA.import_key(f.read())
+                    #Generate, encrypt and send symmetric key
+                    sym_key = get_random_bytes(16)
+                    sym_key_en = pub_encrypt(sym_key, user_pub, False)
+                    connectionSocket.send(sym_key_en)
 
-
-                        sym_key = get_random_bytes(16)
-                        print("SYM_KEY --- ", str(sym_key))
-                        sym_key_en = pub_encrypt(sym_key, user_pub, False)
-                        connectionSocket.send(sym_key_en)
-
-                   #Else send unencrypted �Invalid username or password�, print info, and terminate
-                    else:
-                        connectionSocket.send("Invalid username or password".encode('ascii'))
-                        print("The received clientinformation: [client_username] is invalid (ConnectionTerminated).")
-                        connectionSocket.close()
-                        return
+               #Else send unencrypted �Invalid username or password�, print info, and terminate
+                else:
+                    connectionSocket.send("Invalid username or password".encode('ascii'))
+                    print("The received clientinformation: [client_username] is invalid (ConnectionTerminated).")
+                    connectionSocket.close()
+                    return
 
 
-                   #
-                    menu_text = '''Select the operation:
-    1) Create and send an email
-    2) Display the inbox list
-    3) Display the email contents
-    4) Terminate the connection
+               #
+                menu_text = '''Select the operation:
+1) Create and send an email
+2) Display the inbox list
+3) Display the email contents
+4) Terminate the connection
 choice: '''
 
-                    menu_text_en = sym_encrypt(menu_text, sym_key)
+                menu_text_en = sym_encrypt(menu_text, sym_key)
+
+                #Main menu loop
+                while 1:
+
+                    #Send menu
                     connectionSocket.send(menu_text_en)
 
-
+                    #Recieve user choice
                     choice_en = connectionSocket.recv(2048)
                     choice = sym_decrypt(choice_en, sym_key)
+                    print(choice)
 
                     if (choice == "1"):
-                        pass
+                        send_email(sym_key, connectionSocket)
+                        print("done")
                     elif (choice == "2"):
                         pass
                     elif (choice == "3"):
@@ -102,11 +106,6 @@ choice: '''
                         pass
                     else:
                         pass
-
-
-                    #TEST
-
-
 
 
 
@@ -121,8 +120,8 @@ choice: '''
             print('An error occured:',e)
             serverSocket.close()
             sys.exit(1)
-        except:
-            print('Goodbye')
+        except Exception as e:
+            print('Goodbye', e)
             serverSocket.close()
             sys.exit(0)
 
@@ -187,6 +186,64 @@ def create_socket(serverPort):
 
     print('The server is ready to accept connections')
     return serverSocket
+
+def send_email(sym_key, connectionSocket):
+
+    data = connectionSocket.recv(2048)
+
+    header = sym_decrypt(data, sym_key)
+    print(header)
+
+    header_split = header.split('\n')
+    email = Email()
+    email.date = datetime.datetime.now()
+    email.from_user = header_split[0][6:]
+    email.to_user = header_split[1][4:]
+    email.title = header_split[3][7:]
+    email.content_length = header_split[4][16:]
+
+    data = connectionSocket.recv(2048)
+    while (len(data) < int(email.content_length)):
+        print(len(data), int(email.content_length))
+        data += connectionSocket.recv(2048)
+    message = sym_decrypt(data, sym_key)
+    email.content = message
+
+
+
+    print(str(email))
+
+class Email:
+    from_user = str
+    to_user = str
+    date = datetime.datetime
+    title = str
+    content_length = int
+    content = str
+# from_user:str, to_user:str, date:datetime.datetime, title:str, content_length:str, content:str
+    def __init__(self):
+        #self.from_user = from_user
+        #self.to_user = to_user
+        #self.date = date
+        #self.title = title
+        #self.content_length = content_length
+        #self.content = content
+        pass
+
+    def __str__(self):
+        return f"From: {self.from_user}\nTo: {self.to_user}\nDate: {str(self.date)}\nTitle: {self.title}\nContent Length: {self.content_length}\nContent: {self.content}"
+
+    def __repr__(self):
+        return f"From: {self.from_user}\nTo: {self.to_user}\nDate: {str(self.date)}\nTitle: {self.title}\nContent Length: {self.content_length}\nContent: {self.content}"
+
+    def send_email():
+        pass
+        # TODO: Get length of the email
+        # TODO: encrypt the length
+        # TODO: send the length
+        # TODO: store email as a string (i.e. self.__str__()) in a variable
+        # TODO: encrypt the email string using the sym_encrypt() function
+        # TODO: send the encrypted email to the server
 
 #-------
 main()
