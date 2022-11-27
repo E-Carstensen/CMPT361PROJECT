@@ -78,7 +78,7 @@ def client():
             choice_en = sym_encrypt(choice, sym_key)
             connectionSocket.send(choice_en)
 
-            if choice == "1":
+            if choice == "1": #send emails
                 email = create_email(user_name)
                 email_en = sym_encrypt(str(email), sym_key)
                 email.content_length = len(email_en)
@@ -87,12 +87,12 @@ def client():
                 connectionSocket.sendall(sym_encrypt(str(email), sym_key))
                 print(str(email))
 
-            if choice == "2":
+            if choice == "2": #list inbox
                 pass
-            if choice == "3":
+            if choice == "3": #read email from list
                 pass
-            if choice == "4":
-                pass
+            if choice == "4": #end connection
+                break
 
 
 
@@ -173,7 +173,6 @@ def create_email(sender):
             return
 
     email.content_length = len(email.content)
-
     return email
 
 
@@ -203,14 +202,7 @@ class Email:
     def __repr__(self):
         return f"From: {self.from_user}\nTo: {self.to_user}\nDate: {self.date}\nTitle: {self.title}\nContent Length: {self.content_length}\nContent: {self.content}"
 
-    def send_email():
-        pass
-        # TODO: Get length of the email
-        # TODO: encrypt the length
-        # TODO: send the length
-        # TODO: store email as a string (i.e. self.__str__()) in a variable
-        # TODO: encrypt the email string using the sym_encrypt() function
-        # TODO: send the encrypted email to the server
+
 
 #----------
 client()

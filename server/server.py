@@ -95,16 +95,16 @@ choice: '''
                     choice = sym_decrypt(choice_en, sym_key)
                     print(choice)
 
-                    if (choice == "1"):
+                    if (choice == "1"): #send
                         send_email(sym_key, connectionSocket)
-                        print("done")
-                    elif (choice == "2"):
+                        print("done", flush=True) #TODO delete
+                    elif (choice == "2"): #get list
                         pass
-                    elif (choice == "3"):
+                    elif (choice == "3"): #open email
                         pass
-                    elif (choice == "4"):
-                        pass
-                    else:
+                    elif (choice == "4"): #end connection
+                        break
+                    else: #loop
                         pass
 
 
@@ -193,14 +193,18 @@ def send_email(sym_key, connectionSocket):
     #Recieve expected size or entire encrypted email
     size = connectionSocket.recv(2048)
     size = sym_decrypt(size, sym_key)
-
+    print("the data is sending currently 1", flush=True)
+    sys.stdout.flush()
     #Recieve formatted email string
-    data = connectionSocket.recv(2048)
+    data = connectionSocket.recv(2048) #crashes!!!!!!!!!!!!!!!!!!!!!!!
 
+    print("the data is sending currently 2", flush=True)
+    sys.stdout.flush()
     #While size of data recieved is less than expected, recieve more data
     while (len(data) < int(size)):
         data += connectionSocket.recv(2048)
-
+    print("stuck at the receiving end", flush=True)
+    sys.stdout.flush()
     #Decrypt recieved data to string
     header = sym_decrypt(data, sym_key)
     #Split string on \n character
@@ -219,8 +223,11 @@ def send_email(sym_key, connectionSocket):
     #Add recieved date and time
     email.date = datetime.datetime.now()
 
+    print(f"done with the print\n\nseems to be stuck here??", flush=True)
+    sys.stdout.flush()
 
-    print(str(email))
+
+    print(str(email), flush=True)
     return email
 
 class Email:
@@ -245,15 +252,6 @@ class Email:
 
     def __repr__(self):
         return f"From: {self.from_user}\nTo: {self.to_user}\nDate: {str(self.date)}\nTitle: {self.title}\nContent Length: {self.content_length}\nContent: {self.content}"
-
-    def send_email():
-        pass
-        # TODO: Get length of the email
-        # TODO: encrypt the length
-        # TODO: send the length
-        # TODO: store email as a string (i.e. self.__str__()) in a variable
-        # TODO: encrypt the email string using the sym_encrypt() function
-        # TODO: send the encrypted email to the server
 
 #-------
 main()
