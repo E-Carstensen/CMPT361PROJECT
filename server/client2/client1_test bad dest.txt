@@ -1,0 +1,7 @@
+From: client1
+To: client2;badtestlocation
+Date: 2022-11-28 22:56:30.568320
+Title: test bad dest
+Content Length: 70
+Content: 
+this is a test if any of the people are bad locations and do not exist

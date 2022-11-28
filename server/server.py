@@ -66,6 +66,8 @@ def main():
                     sym_key_en = pub_encrypt(sym_key, user_pub, False)
                     connectionSocket.send(sym_key_en)
 
+                    print(f"Connection Accepted and Symmetric Key Generated for client: {user_name}")
+
                #Else send unencrypted �Invalid username or password�, print info, and terminate
                 else:
                     connectionSocket.send("Invalid username or password".encode('ascii'))
@@ -73,18 +75,18 @@ def main():
                     connectionSocket.close()
                     return
 
-
-               #
+               #menu text that is displayed to user after each input
                 menu_text = '''Select the operation:
-1) Create and send an email
-2) Display the inbox list
-3) Display the email contents
-4) Terminate the connection
-choice: '''
+        1) Create and send an email
+        2) Display the inbox list
+        3) Display the email contents
+        4) Terminate the connection
+
+        choice: '''
 
                 menu_text_en = sym_encrypt(menu_text, sym_key)
 
-                #Main menu loop
+                #Main menu loop-------------------------------------------------
                 while 1:
 
                     #Send menu
@@ -93,11 +95,10 @@ choice: '''
                     #Recieve user choice
                     choice_en = connectionSocket.recv(2048)
                     choice = sym_decrypt(choice_en, sym_key)
-                    print(choice)
+                    #print(choice)
 
                     if (choice == "1"): #send
                         send_email(sym_key, connectionSocket)
-                        print("done", flush=True) #TODO delete
                     elif (choice == "2"): #get list
                         pass
                     elif (choice == "3"): #open email
@@ -109,7 +110,8 @@ choice: '''
 
 
 
-                #End of main loop, close connection and return
+                #End of main loop, close connection and return------------------
+                print(f"Terminating connection with {user_name}")
                 connectionSocket.close()
                 return
 
@@ -193,20 +195,22 @@ def send_email(sym_key, connectionSocket):
     #Recieve expected size or entire encrypted email
     size = connectionSocket.recv(2048)
     size = sym_decrypt(size, sym_key)
-    print("the data is sending currently 1", flush=True)
-    sys.stdout.flush()
-    #Recieve formatted email string
-    data = connectionSocket.recv(2048) #crashes!!!!!!!!!!!!!!!!!!!!!!!
 
-    print("the data is sending currently 2", flush=True)
-    sys.stdout.flush()
+    #confirm back to client TODO CHECK SIZE MAX
+    confirm = "size OK"
+    confirm = sym_encrypt(confirm, sym_key)
+    connectionSocket.send(confirm)
+
+    #Recieve formatted email string
+    data = connectionSocket.recv(2048)
+
     #While size of data recieved is less than expected, recieve more data
     while (len(data) < int(size)):
         data += connectionSocket.recv(2048)
-    print("stuck at the receiving end", flush=True)
-    sys.stdout.flush()
+
     #Decrypt recieved data to string
     header = sym_decrypt(data, sym_key)
+
     #Split string on \n character
     header_split = header.split('\n')
 
@@ -215,19 +219,27 @@ def send_email(sym_key, connectionSocket):
     email.from_user = header_split[0][6:]
     email.to_user = header_split[1][4:]
     email.title = header_split[3][7:]
-    #Dont have to send length with whole email - Maybe send before
-    email.content_length = size
-
     email.content = ''.join(header_split[5:])[9:]
-
+    email.content_length = len(str(email.content))
     #Add recieved date and time
     email.date = datetime.datetime.now()
+    #server print
+    print(f"An email from {str(email.from_user)} is sent to {str(email.to_user)} has a conent length of {str(email.content_length)} .")
 
-    print(f"done with the print\n\nseems to be stuck here??", flush=True)
-    sys.stdout.flush()
+    #making values to store the emails in their inboxes
+    user_from = str(email.from_user)
+    user_to = str(email.to_user)
+    inboxes = user_to.split(";")
+    title = str(email.title)
+    directory = os.getcwd()
+    for name in inboxes:
+        path = os.path.join(directory+"/"+name)
+        if (os.path.exists(path)): #check if there is a folder to send to
+            full_path_name = os.path.join(path, user_from+"_"+title+".txt")
+            email_string = str(email)
+            with open(full_path_name, 'w') as f:
+                f.write(email_string)
 
-
-    print(str(email), flush=True)
     return email
 
 class Email:
@@ -248,10 +260,10 @@ class Email:
         pass
 
     def __str__(self):
-        return f"From: {self.from_user}\nTo: {self.to_user}\nDate: {str(self.date)}\nTitle: {self.title}\nContent Length: {self.content_length}\nContent: {self.content}"
+        return f"From: {self.from_user}\nTo: {self.to_user}\nDate: {str(self.date)}\nTitle: {self.title}\nContent Length: {self.content_length}\nContent: \n{self.content}"
 
     def __repr__(self):
-        return f"From: {self.from_user}\nTo: {self.to_user}\nDate: {str(self.date)}\nTitle: {self.title}\nContent Length: {self.content_length}\nContent: {self.content}"
+        return f"From: {self.from_user}\nTo: {self.to_user}\nDate: {str(self.date)}\nTitle: {self.title}\nContent Length: {self.content_length}\nContent: \n{self.content}"
 
 #-------
 main()

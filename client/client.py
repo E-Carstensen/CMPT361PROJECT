@@ -20,7 +20,7 @@ def client():
     serverName = '127.0.0.1' #'localhost'
     serverPort = 12047
 
-    temp = input("Enter the server IP or name:")
+    temp = input("Enter the server IP or name: ")
     if (len(temp) != 0):
         serverName = temp
 
@@ -78,27 +78,35 @@ def client():
             choice_en = sym_encrypt(choice, sym_key)
             connectionSocket.send(choice_en)
 
-            if choice == "1": #send emails
+            if (choice == "1"): #send emails
                 email = create_email(user_name)
                 email_en = sym_encrypt(str(email), sym_key)
                 email.content_length = len(email_en)
+
                 #email_en = sym_encrypt(str(email), sym_key)
                 connectionSocket.send(sym_encrypt(str(email.content_length), sym_key))
-                connectionSocket.sendall(sym_encrypt(str(email), sym_key))
-                print(str(email))
 
-            if choice == "2": #list inbox
+                #confirm that they got the size, times the email sending better
+                confirm = connectionSocket.recv(2048)
+                confirm = sym_decrypt(confirm, sym_key)
+                if (confirm == 'size OK'):
+
+                    #send the email
+                    connectionSocket.sendall(sym_encrypt(str(email), sym_key))
+                    print("The message is sent to the server.")
+                else:
+                    print("failed to send email, No comfirm back")
+
+            elif (choice == "2"): #list inbox
                 pass
-            if choice == "3": #read email from list
+            elif (choice == "3"): #read email from list
                 pass
-            if choice == "4": #end connection
+            elif (choice == "4"): #end connection
+                print("The connection is terminated with the server.")
                 break
-
-
-
-
-
-
+            else:
+                #loop
+                pass
 
         # Client terminate connection with the server
         connectionSocket.close()
@@ -107,8 +115,6 @@ def client():
         print('An error occured:',e)
         connectionSocket.close()
         sys.exit(1)
-
-
 
 
 
@@ -172,7 +178,7 @@ def create_email(sender):
             print("Invailid File Name")
             return
 
-    email.content_length = len(email.content)
+    email.content_length = len(str(email.content))
     return email
 
 

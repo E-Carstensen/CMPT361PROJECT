@@ -1,0 +1,7 @@
+From: client1
+To: client2;client3
+Date: 2022-11-28 22:52:15.482579
+Title: testrun2
+Content Length: 37
+Content:
+this is the second test with 2 people
