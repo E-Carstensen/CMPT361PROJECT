@@ -40,10 +40,10 @@ def client():
         user_name = input("Enter your username: ")
         password = input("Enter your password: ")
 
-        debug = True #DEBUG -Change before demo
-        if (debug):
-            user_name = 'client1'
-            password = 'password1'
+        #debug = True #DEBUG
+        #if (debug):
+        #    user_name = 'client1'
+        #    password = 'password1'
 
 
         login = "\n".join((user_name, password))
