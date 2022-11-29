@@ -100,7 +100,10 @@ def main():
                     elif (choice == "2"): #get list
                         view_inbox_subprotocol(sym_key, connectionSocket, user_name)
                     elif (choice == "3"): #open email
-                        pass
+                        message = "Enter the email index you wish to view: "
+                        connectionSocket.send(sym_encrypt(message, sym_key))
+                        selection = sym_decrypt(connectionSocket.recv(2048), sym_key)
+                        readEmailContents(user_name, selection, sym_key, connectionSocket)
                     elif (choice == "4"): #end connection
                         break
                     else: #loop
@@ -239,6 +242,36 @@ def send_email(sym_key, connectionSocket):
                 f.write(email_string)
 
     return email
+
+
+# This function for the time being takes the cleint name and email name, and reads and sends the contents to
+# the client. The argument for 'clientName' will probably get removed when the "view inbox function" gets
+# added, as they are interdependant, and this operation should work off of that function's information.
+def readEmailContents(clientName, emailName, sym_key, connectionSocket):
+    directory = os.getcwd()
+    path = os.path.join(directory+"/"+clientName)
+
+    # If the path exists, execute the read operation.
+    # NOTE: This does not seem to prevent error flags, but judging that this
+    # function will be pretty encapsulated, I don't think it'll matter.
+    if (os.path.exists(path)):
+        # create the full path name.
+        full_path_name = os.path.join(path, emailName + ".txt")
+        with open(full_path_name, 'r') as f:
+            # read file contents into 'content', tokenize, and store in an array 'emailArr'.
+            content = f.read()
+            emailLen = str(len(content))
+            print(emailLen)
+            connectionSocket.send(sym_encrypt(emailLen, sym_key))
+            print("Sent")
+            clientAccept = sym_decrypt(connectionSocket.recv(2048), sym_key)
+            print(clientAccept)
+            if clientAccept == "OK":
+                connectionSocket.sendall(sym_encrypt(str(content), sym_key))
+            else:
+                connectionSocket.send(sym_encrypt("client refused send", sym_key))
+            
+    f.close()
 
 def view_inbox_subprotocol(sym_key:bytes, connectionSocket:socket.socket, user_name:str):
     emails = []

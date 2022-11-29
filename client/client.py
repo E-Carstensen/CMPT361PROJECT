@@ -100,7 +100,26 @@ def client():
             elif (choice == "2"): #list inbox
                 view_inbox_subprotocol(connectionSocket, sym_key)
             elif (choice == "3"): #read email from list
-                pass
+                # Ask the user to enter the email to be read. for now enter the filename.
+                # THERE IS NO ERROR CHECKING.
+                message = input(sym_decrypt(connectionSocket.recv(2048), sym_key))
+                # Send the name of the email to the server.
+                connectionSocket.send(sym_encrypt(message, sym_key))
+                # Receive size of email from server.
+                size = sym_decrypt(connectionSocket.recv(2048), sym_key)
+                connectionSocket.send(sym_encrypt("OK", sym_key))
+                #Recieve formatted email string
+                data = connectionSocket.recv(2048)
+
+                #Receive data until it equals size.
+                while (len(data) < int(size)):
+                    data += connectionSocket.recv(2048)
+                # Print the entire email gathered in data. thanks to newline, I can
+                # print the entire email in just one print statements. newlines added
+                # to match the formatting on the assignment document. See page 9.
+                print("\n" + sym_decrypt(data, sym_key) + "\n")
+
+
             elif (choice == "4"): #end connection
                 print("The connection is terminated with the server.")
                 break
