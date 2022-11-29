@@ -25,7 +25,7 @@ def main():
 
 
     #Server port
-    serverPort = 12047
+    serverPort = 12049
 
     serverSocket = create_socket(serverPort)
 
@@ -251,12 +251,6 @@ class Email:
     content = str
 # from_user:str, to_user:str, date:datetime.datetime, title:str, content_length:str, content:str
     def __init__(self):
-        #self.from_user = from_user
-        #self.to_user = to_user
-        #self.date = date
-        #self.title = title
-        #self.content_length = content_length
-        #self.content = content
         pass
 
     def __str__(self):
