@@ -1,4 +1,4 @@
-# This is an example from "Computer Networking: A Top Down Approach" textbook chapter 2
+#Project 361 group 6, Samuel Brownlee, Eric Carstensen, Simon Gordon, Evan Stewart
 import json
 import socket
 import os, glob, datetime
@@ -18,7 +18,7 @@ def client():
 
     # Server Information
     serverName = '127.0.0.1' #'localhost'
-    serverPort = 12047
+    serverPort = 12049
 
     temp = input("Enter the server IP or name: ")
     if (len(temp) != 0):
