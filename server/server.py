@@ -100,7 +100,7 @@ def main():
                     if (choice == "1"): #send
                         send_email(sym_key, connectionSocket)
                     elif (choice == "2"): #get list
-                        pass
+                        view_inbox_subprotocol(sym_key, connectionSocket, user_name)
                     elif (choice == "3"): #open email
                         pass
                     elif (choice == "4"): #end connection
@@ -242,6 +242,51 @@ def send_email(sym_key, connectionSocket):
 
     return email
 
+def view_inbox_subprotocol(sym_key:bytes, connectionSocket:socket.socket, user_name:str):
+    emails = []
+
+    #Iterate through each email in the user folder
+    for filename in os.listdir(user_name):
+        #Verify that the file is a text file
+        if filename.endswith(".txt"):
+            #Create an email object
+            email = Email()
+
+            #Load email into object
+            email.load_email(user_name+"/"+filename)
+
+            #Append email to list
+            emails.append(email)
+        else:
+            continue
+    
+    formatted_emails = format_inbox_as_table(emails)
+
+    #Send number of emails to client
+    num_emails = len(formatted_emails)
+    num_emails = str(num_emails)
+    num_emails = sym_encrypt(num_emails, sym_key)
+    connectionSocket.send(num_emails)
+
+    #Recieve confirmation from client
+    confirm = connectionSocket.recv(2048)
+    confirm = sym_decrypt(confirm, sym_key)
+
+    #Send formatted emails to client
+    if(confirm in "size OK"):
+        formatted_emails = sym_encrypt(formatted_emails, sym_key)
+        connectionSocket.sendall(formatted_emails)
+
+def format_inbox_as_table(emails:list) -> str:
+    #Creat table, set headers
+    table = "{0:<8}{1:<15}{2:<30}{3:<15}\n".format("Index", "From", "Date", "Title")
+    
+    #For each row in the table, format and append
+    for index, email in enumerate(emails):
+        table += f"{index:<8}{email.from_user:<15}{email.date:<30}{email.title:<15}\n"
+
+    return table
+
 class Email:
     from_user = str
     to_user = str
@@ -249,7 +294,7 @@ class Email:
     title = str
     content_length = int
     content = str
-# from_user:str, to_user:str, date:datetime.datetime, title:str, content_length:str, content:str
+
     def __init__(self):
         #self.from_user = from_user
         #self.to_user = to_user
@@ -265,5 +310,17 @@ class Email:
     def __repr__(self):
         return f"From: {self.from_user}\nTo: {self.to_user}\nDate: {str(self.date)}\nTitle: {self.title}\nContent Length: {self.content_length}\nContent: \n{self.content}"
 
+    def load_email(self:object, email_path:str):
+        #Open the file
+        with open(email_path, 'r') as f:
+            #Read email contents into variables
+            contents = f.read()
+    
+        self.from_user = contents.split("From: ")[1].split("\n")[0]
+        self.to_user = contents.split("To: ")[1].split("\n")[0]
+        self.date = contents.split("Date: ")[1].split("\n")[0]
+        self.title = contents.split("Title: ")[1].split("\n")[0]
+        self.content_length = contents.split("Content Length: ")[1].split("\n")[0]
+        self.content = contents.split("Content:")[1].split("\n")[1]
 #-------
 main()

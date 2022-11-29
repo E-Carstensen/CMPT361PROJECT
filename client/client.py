@@ -98,7 +98,7 @@ def client():
                     print("failed to send email, No comfirm back")
 
             elif (choice == "2"): #list inbox
-                pass
+                view_inbox_subprotocol(connectionSocket, sym_key)
             elif (choice == "3"): #read email from list
                 pass
             elif (choice == "4"): #end connection
@@ -115,9 +115,6 @@ def client():
         print('An error occured:',e)
         connectionSocket.close()
         sys.exit(1)
-
-
-
 
 #Takes a string and returns a symetric encrypted binary
 def sym_encrypt(message, key, string = True):
@@ -181,9 +178,24 @@ def create_email(sender):
     email.content_length = len(str(email.content))
     return email
 
+def view_inbox_subprotocol(connectionSocket: socket.socket, sym_key: bytes):
+    #Recieve inbox size
+    inbox_size_en = connectionSocket.recv(2048)
+    inbox_size = sym_decrypt(inbox_size_en, sym_key)
+    inbox_size = int(inbox_size)
 
+    #Send confirmation
+    connectionSocket.send(sym_encrypt("size OK", sym_key))
 
+    #Recieve inbox
+    inbox_en = connectionSocket.recv(2048)
 
+    #Keep recieving all bytes
+    while (len(inbox_en) < inbox_size):
+        inbox_en += connectionSocket.recv(2048)
+
+    inbox = sym_decrypt(inbox_en, sym_key)
+    print(inbox)
 
 class Email:
     from_user = str
