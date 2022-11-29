@@ -18,7 +18,7 @@ def client():
 
     # Server Information
     serverName = '127.0.0.1' #'localhost'
-    serverPort = 12049
+    serverPort = 13000
 
     temp = input("Enter the server IP or name: ")
     if (len(temp) != 0):

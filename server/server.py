@@ -23,7 +23,7 @@ def main():
 
 
     #Server port
-    serverPort = 12049
+    serverPort = 13000
 
     serverSocket = create_socket(serverPort)
 
@@ -98,7 +98,7 @@ def main():
                     if (choice == "1"): #send
                         send_email(sym_key, connectionSocket)
                     elif (choice == "2"): #get list
-                        view_inbox_subprotocol(sym_key, connectionSocket, user_name)
+                        emails = view_inbox_subprotocol(sym_key, connectionSocket, user_name)
                     elif (choice == "3"): #open email
                         message = "Enter the email index you wish to view: "
                         connectionSocket.send(sym_encrypt(message, sym_key))
@@ -270,7 +270,7 @@ def readEmailContents(clientName, emailName, sym_key, connectionSocket):
                 connectionSocket.sendall(sym_encrypt(str(content), sym_key))
             else:
                 connectionSocket.send(sym_encrypt("client refused send", sym_key))
-            
+
     f.close()
 
 def view_inbox_subprotocol(sym_key:bytes, connectionSocket:socket.socket, user_name:str):
@@ -290,7 +290,7 @@ def view_inbox_subprotocol(sym_key:bytes, connectionSocket:socket.socket, user_n
             emails.append(email)
         else:
             continue
-    
+
     formatted_emails = format_inbox_as_table(emails)
 
     #Send number of emails to client
@@ -307,11 +307,12 @@ def view_inbox_subprotocol(sym_key:bytes, connectionSocket:socket.socket, user_n
     if(confirm in "size OK"):
         formatted_emails = sym_encrypt(formatted_emails, sym_key)
         connectionSocket.sendall(formatted_emails)
+    return email
 
 def format_inbox_as_table(emails:list) -> str:
     #Creat table, set headers
     table = "{0:<8}{1:<15}{2:<30}{3:<15}\n".format("Index", "From", "Date", "Title")
-    
+
     #For each row in the table, format and append
     for index, email in enumerate(emails):
         table += f"{index:<8}{email.from_user:<15}{email.date:<30}{email.title:<15}\n"
@@ -340,7 +341,7 @@ class Email:
         with open(email_path, 'r') as f:
             #Read email contents into variables
             contents = f.read()
-    
+
         self.from_user = contents.split("From: ")[1].split("\n")[0]
         self.to_user = contents.split("To: ")[1].split("\n")[0]
         self.date = contents.split("Date: ")[1].split("\n")[0]
