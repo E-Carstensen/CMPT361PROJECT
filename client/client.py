@@ -1,4 +1,4 @@
-# This is an example from "Computer Networking: A Top Down Approach" textbook chapter 2
+#Project 361 group 6, Samuel Brownlee, Eric Carstensen, Simon Gordon, Evan Stewart
 import json
 import socket
 import os, glob, datetime
