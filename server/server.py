@@ -83,7 +83,7 @@ def main():
         choice: '''
 
                 menu_text_en = sym_encrypt(menu_text, sym_key)
-
+                emails = []
                 #Main menu loop-------------------------------------------------
                 while 1:
 
@@ -98,12 +98,19 @@ def main():
                     if (choice == "1"): #send
                         send_email(sym_key, connectionSocket)
                     elif (choice == "2"): #get list
-                        view_inbox_subprotocol(sym_key, connectionSocket, user_name)
+                        emails = view_inbox_subprotocol(sym_key, connectionSocket, user_name)
                     elif (choice == "3"): #open email
                         message = "Enter the email index you wish to view: "
                         connectionSocket.send(sym_encrypt(message, sym_key))
                         selection = sym_decrypt(connectionSocket.recv(2048), sym_key)
-                        readEmailContents(user_name, selection, sym_key, connectionSocket)
+                        #print(selection)
+                        if len(emails) < int(selection) or int(selection) < 0:
+                            messasge = "Error"
+                            #print("FLAG")
+                            connectionSocket.send(sym_encrypt(message, sym_key))
+                        else:
+                            title = emails[int(selection)].from_user+"_"+emails[int(selection)].title
+                            readEmailContents(user_name, title, sym_key, connectionSocket)
                     elif (choice == "4"): #end connection
                         break
                     else: #loop
@@ -307,6 +314,7 @@ def view_inbox_subprotocol(sym_key:bytes, connectionSocket:socket.socket, user_n
     if(confirm in "size OK"):
         formatted_emails = sym_encrypt(formatted_emails, sym_key)
         connectionSocket.sendall(formatted_emails)
+    return emails
 
 def format_inbox_as_table(emails:list) -> str:
     #Creat table, set headers
