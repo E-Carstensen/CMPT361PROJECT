@@ -107,17 +107,21 @@ def client():
                 connectionSocket.send(sym_encrypt(message, sym_key))
                 # Receive size of email from server.
                 size = sym_decrypt(connectionSocket.recv(2048), sym_key)
-                connectionSocket.send(sym_encrypt("OK", sym_key))
-                #Recieve formatted email string
-                data = connectionSocket.recv(2048)
+                #print("This is size:" + size + "done")
+                if size == "ERROR":
+                    print("Invalid selection. View inbox for accepted options.\n")
+                else:
+                    connectionSocket.send(sym_encrypt("OK", sym_key))
+                    #Recieve formatted email string
+                    data = connectionSocket.recv(2048)
 
-                #Receive data until it equals size.
-                while (len(data) < int(size)):
-                    data += connectionSocket.recv(2048)
-                # Print the entire email gathered in data. thanks to newline, I can
-                # print the entire email in just one print statements. newlines added
-                # to match the formatting on the assignment document. See page 9.
-                print("\n" + sym_decrypt(data, sym_key) + "\n")
+                    #Receive data until it equals size.
+                    while (len(data) < int(size)):
+                        data += connectionSocket.recv(2048)
+                    # Print the entire email gathered in data. thanks to newline, I can
+                    # print the entire email in just one print statements. newlines added
+                    # to match the formatting on the assignment document. See page 9.
+                    print("\n" + sym_decrypt(data, sym_key) + "\n")
 
 
             elif (choice == "4"): #end connection
