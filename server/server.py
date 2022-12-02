@@ -23,7 +23,7 @@ def main():
 
 
     #Server port
-    serverPort = 13000
+    serverPort = 12049
 
     serverSocket = create_socket(serverPort)
 
@@ -100,17 +100,24 @@ def main():
                     elif (choice == "2"): #get list
                         emails = view_inbox_subprotocol(sym_key, connectionSocket, user_name)
                     elif (choice == "3"): #open email
-                        message = "Enter the email index you wish to view: "
-                        connectionSocket.send(sym_encrypt(message, sym_key))
-                        selection = sym_decrypt(connectionSocket.recv(2048), sym_key)
-                        #print(selection)
-                        if len(emails) < int(selection) or int(selection) < 0:
-                            messasge = "Error"
-                            #print("FLAG")
-                            connectionSocket.send(sym_encrypt(message, sym_key))
+                        if len(emails) == 0:
+                            confirm = "ERROR1"
+                            confirm = sym_encrypt(confirm, sym_key)
+                            connectionSocket.send(confirm)
+                            connectionSocket.recv(2048)
                         else:
-                            title = emails[int(selection)].from_user+"_"+emails[int(selection)].title
-                            readEmailContents(user_name, title, sym_key, connectionSocket)
+                            message = "Enter the email index you wish to view: "
+                            connectionSocket.send(sym_encrypt(message, sym_key))
+                            selection = sym_decrypt(connectionSocket.recv(2048), sym_key)
+                            #print(selection)
+                            if len(emails) <= int(selection) or int(selection) < 0:
+                                confirm = "ERROR2"
+                                confirm = sym_encrypt(confirm, sym_key)
+                                connectionSocket.send(confirm)
+                                connectionSocket.recv(2048)
+                            else:
+                                title = emails[int(selection)].from_user+"_"+emails[int(selection)].title
+                                readEmailContents(user_name, title, sym_key, connectionSocket)
                     elif (choice == "4"): #end connection
                         break
                     else: #loop
@@ -277,7 +284,7 @@ def readEmailContents(clientName, emailName, sym_key, connectionSocket):
                 connectionSocket.sendall(sym_encrypt(str(content), sym_key))
             else:
                 connectionSocket.send(sym_encrypt("client refused send", sym_key))
-
+            
     f.close()
 
 def view_inbox_subprotocol(sym_key:bytes, connectionSocket:socket.socket, user_name:str):
@@ -297,7 +304,7 @@ def view_inbox_subprotocol(sym_key:bytes, connectionSocket:socket.socket, user_n
             emails.append(email)
         else:
             continue
-
+    
     formatted_emails = format_inbox_as_table(emails)
 
     #Send number of emails to client
@@ -319,7 +326,7 @@ def view_inbox_subprotocol(sym_key:bytes, connectionSocket:socket.socket, user_n
 def format_inbox_as_table(emails:list) -> str:
     #Creat table, set headers
     table = "{0:<8}{1:<15}{2:<30}{3:<15}\n".format("Index", "From", "Date", "Title")
-
+    
     #For each row in the table, format and append
     for index, email in enumerate(emails):
         table += f"{index:<8}{email.from_user:<15}{email.date:<30}{email.title:<15}\n"
@@ -348,7 +355,7 @@ class Email:
         with open(email_path, 'r') as f:
             #Read email contents into variables
             contents = f.read()
-
+    
         self.from_user = contents.split("From: ")[1].split("\n")[0]
         self.to_user = contents.split("To: ")[1].split("\n")[0]
         self.date = contents.split("Date: ")[1].split("\n")[0]
