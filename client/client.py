@@ -18,7 +18,7 @@ def client():
 
     # Server Information
     serverName = '127.0.0.1' #'localhost'
-    serverPort = 13000
+    serverPort = 12049
 
     temp = input("Enter the server IP or name: ")
     if (len(temp) != 0):
@@ -100,28 +100,32 @@ def client():
             elif (choice == "2"): #list inbox
                 view_inbox_subprotocol(connectionSocket, sym_key)
             elif (choice == "3"): #read email from list
-                # Ask the user to enter the email to be read. for now enter the filename.
-                # THERE IS NO ERROR CHECKING.
-                message = input(sym_decrypt(connectionSocket.recv(2048), sym_key))
-                # Send the name of the email to the server.
-                connectionSocket.send(sym_encrypt(message, sym_key))
-                # Receive size of email from server.
-                size = sym_decrypt(connectionSocket.recv(2048), sym_key)
-                #print("This is size:" + size + "done")
-                if size == "ERROR":
-                    print("Invalid selection. View inbox for accepted options.\n")
-                else:
+                message = sym_decrypt(connectionSocket.recv(2048), sym_key)
+                if message == "ERROR1":
+                    print("Invalid selection. Inbox list not generated.\n")
                     connectionSocket.send(sym_encrypt("OK", sym_key))
-                    #Recieve formatted email string
-                    data = connectionSocket.recv(2048)
+                # Ask the user to enter the email to be read.
+                # Send the name of the email to the server.
+                else:
+                    message = input(message)
+                    connectionSocket.send(sym_encrypt(message, sym_key))
+                    # Receive size of email from server.
+                    size = sym_decrypt(connectionSocket.recv(2048), sym_key)
+                    if size == "ERROR2":
+                        print("Invalid selection. View inbox for accepted options.\n")
+                        connectionSocket.send(sym_encrypt("OK", sym_key))
+                    else:
+                        connectionSocket.send(sym_encrypt("OK", sym_key))
+                        #Recieve formatted email string
+                        data = connectionSocket.recv(2048)
 
-                    #Receive data until it equals size.
-                    while (len(data) < int(size)):
-                        data += connectionSocket.recv(2048)
-                    # Print the entire email gathered in data. thanks to newline, I can
-                    # print the entire email in just one print statements. newlines added
-                    # to match the formatting on the assignment document. See page 9.
-                    print("\n" + sym_decrypt(data, sym_key) + "\n")
+                        #Receive data until it equals size.
+                        while (len(data) < int(size)):
+                            data += connectionSocket.recv(2048)
+                        # Print the entire email gathered in data. thanks to newline, I can
+                        # print the entire email in just one print statements. newlines added
+                        # to match the formatting on the assignment document. See page 9.
+                        print("\n" + sym_decrypt(data, sym_key) + "\n")
 
 
             elif (choice == "4"): #end connection
