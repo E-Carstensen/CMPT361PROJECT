@@ -239,7 +239,7 @@ def send_email(sym_key, connectionSocket):
     #Add recieved date and time
     email.date = datetime.datetime.now()
     #server print
-    print("An email from ",str(email.from_user)," is sent to ",str(email.to_user)," has a conent length of ",str(email.content_length),".")
+    print("An email from " + str(email.from_user) + " is sent to " + str(email.to_user) + " has a conent length of " + str(email.content_length) + ".")
 
     #making values to store the emails in their inboxes
     user_from = str(email.from_user)
@@ -328,8 +328,10 @@ def format_inbox_as_table(emails:list) -> str:
     table = "{0:<8}{1:<15}{2:<30}{3:<15}\n".format("Index", "From", "Date", "Title")
 
     #For each row in the table, format and append
+    i = 0
     for index, email in enumerate(emails):
-        table += "{index:<8}{email.from_user:<15}{email.date:<30}{email.title:<15}\n"
+        table += "{0:<8}{1:<15}{2:<30}{3:<15}\n".format(i, email.from_user, email.date, email.title)
+        i += 1
 
     return table
 
