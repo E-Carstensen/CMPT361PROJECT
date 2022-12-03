@@ -9,9 +9,9 @@ from Crypto.Util.Padding import pad, unpad
 from Crypto.PublicKey import RSA
 from Crypto.Cipher import PKCS1_OAEP
 from Crypto.Random import get_random_bytes
+from Crypto.Hash import SHA1
 
 
-#
 def main():
 
 
@@ -284,7 +284,7 @@ def readEmailContents(clientName, emailName, sym_key, connectionSocket):
                 connectionSocket.sendall(sym_encrypt(str(content), sym_key))
             else:
                 connectionSocket.send(sym_encrypt("client refused send", sym_key))
-            
+
     f.close()
 
 def view_inbox_subprotocol(sym_key:bytes, connectionSocket:socket.socket, user_name:str):
@@ -304,7 +304,7 @@ def view_inbox_subprotocol(sym_key:bytes, connectionSocket:socket.socket, user_n
             emails.append(email)
         else:
             continue
-    
+
     formatted_emails = format_inbox_as_table(emails)
 
     #Send number of emails to client
@@ -326,7 +326,7 @@ def view_inbox_subprotocol(sym_key:bytes, connectionSocket:socket.socket, user_n
 def format_inbox_as_table(emails:list) -> str:
     #Creat table, set headers
     table = "{0:<8}{1:<15}{2:<30}{3:<15}\n".format("Index", "From", "Date", "Title")
-    
+
     #For each row in the table, format and append
     for index, email in enumerate(emails):
         table += f"{index:<8}{email.from_user:<15}{email.date:<30}{email.title:<15}\n"
@@ -355,7 +355,7 @@ class Email:
         with open(email_path, 'r') as f:
             #Read email contents into variables
             contents = f.read()
-    
+
         self.from_user = contents.split("From: ")[1].split("\n")[0]
         self.to_user = contents.split("To: ")[1].split("\n")[0]
         self.date = contents.split("Date: ")[1].split("\n")[0]
