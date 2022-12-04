@@ -347,10 +347,10 @@ class Email:
         pass
 
     def __str__(self):
-        return f"From: ",str(self.from_user),"\nTo: ",str(self.to_user),"\nDate: ",str(self.date),"\nTitle: ",(self.title),"\nContent Length: ",str(self.content_length),"\nContent: \n",str(self.content)
+        return f"From: {self.from_user}\nTo {self.to_user} \nDate: {self.date}\nTitle: {self.title}\nContent Length: {self.content_length}\nContent: \n{self.content}"
 
     def __repr__(self):
-        return f"From: ",str(self.from_user),"\nTo: ",str(self.to_user),"\nDate: ",str(self.date),"\nTitle: ",(self.title),"\nContent Length: ",str(self.content_length),"\nContent: \n",str(self.content)
+        return f"From: {self.from_user}\nTo {self.to_user} \nDate: {self.date}\nTitle: {self.title}\nContent Length: {self.content_length}\nContent: \n{self.content}"
 
     def load_email(self:object, email_path:str):
         #Open the file
