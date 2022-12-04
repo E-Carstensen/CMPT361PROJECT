@@ -48,6 +48,12 @@ def client():
 
 
         login = "\n".join((user_name, password))
+        #ENHANCEMENT------------------------------------------------------------
+        hash = SHA1.new()
+        hash.update(login.encode('ascii'))
+        hash_value = hash.hexdigest()
+        login = "\n".join((user_name, password, hash_value)) #add a hash value to the end of the login
+
         login_en = pub_encrypt(login, server_pub)
         connectionSocket.send(login_en)
 
@@ -59,6 +65,7 @@ def client():
             connectionSocket.close()
             return
 
+        #end of enhancement-----------------------------------------------------
         with open(user_name + "_public.pem", "rb") as f:
             client_pub = RSA.import_key(f.read())
 

@@ -49,6 +49,19 @@ def main():
                 user_name = login[0]
                 pswrd = login[1]
 
+                #START OF ENHANCED VERSION -------------------------------------
+                hash1 = login[2]
+                login2 = "\n".join((user_name, pswrd))
+                hash2 = SHA1.new()
+                hash2.update(login2.encode('ascii'))
+                hash_value2 = hash2.hexdigest()
+
+                if hash1 != hash_value2:
+                    print("Error, hash values are not the same, message has been adjusted after client by middle-man")
+                    print("Closing the connection")
+                    return
+                #end of enchaned version----------------------------------------
+
                 #Compare against Json
                 with open("user_pass.json", "r") as f:
                     user_pass = json.load(f)
