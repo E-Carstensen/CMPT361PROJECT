@@ -15,10 +15,10 @@ from Crypto.Hash import SHA1
 def main():
 
 
-    with open("keys/server_public.pem", "r") as f:
+    with open("server_public.pem", "r") as f:
         server_pub = RSA.import_key(f.read())
 
-    with open("keys/server_private.pem", "r") as f:
+    with open("server_private.pem", "r") as f:
         server_priv = RSA.import_key(f.read())
 
 
@@ -56,7 +56,7 @@ def main():
                 #Compare given user_name and password with json file
                 if (user_name in user_pass and user_pass[user_name] == pswrd):
                     #Get users public key
-                    with open("keys/" + user_name + "_public.pem", "rb") as f:
+                    with open(user_name + "_public.pem", "rb") as f:
                         user_pub = RSA.import_key(f.read())
 
                     #Generate, encrypt and send symmetric key
@@ -347,10 +347,10 @@ class Email:
         pass
 
     def __str__(self):
-        return "From: ",str(self.from_user),"\nTo: ",str(self.to_user),"\nDate: ",str(self.date),"\nTitle: ",(self.title),"\nContent Length: ",str(self.content_length),"\nContent: \n",str(self.content)
+        return f"From: ",str(self.from_user),"\nTo: ",str(self.to_user),"\nDate: ",str(self.date),"\nTitle: ",(self.title),"\nContent Length: ",str(self.content_length),"\nContent: \n",str(self.content)
 
     def __repr__(self):
-        return "From: ",str(self.from_user),"\nTo: ",str(self.to_user),"\nDate: ",str(self.date),"\nTitle: ",(self.title),"\nContent Length: ",str(self.content_length),"\nContent: \n",str(self.content)
+        return f"From: ",str(self.from_user),"\nTo: ",str(self.to_user),"\nDate: ",str(self.date),"\nTitle: ",(self.title),"\nContent Length: ",str(self.content_length),"\nContent: \n",str(self.content)
 
     def load_email(self:object, email_path:str):
         #Open the file
