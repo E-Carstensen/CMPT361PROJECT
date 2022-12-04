@@ -1,9 +1,9 @@
 #Project 361 group 6, Samuel Brownlee, Eric Carstensen, Simon Gordon, Evan Stewart
-
 import json
 import socket
-import os,glob, datetime
+import os, glob, datetime
 import sys
+import Crypto
 from Crypto.Cipher import AES
 from Crypto.Util.Padding import pad, unpad
 from Crypto.PublicKey import RSA
@@ -64,7 +64,7 @@ def main():
                     sym_key_en = pub_encrypt(sym_key, user_pub, False)
                     connectionSocket.send(sym_key_en)
 
-                    print(f"Connection Accepted and Symmetric Key Generated for client: {user_name}")
+                    print("Connection Accepted and Symmetric Key Generated for client: ", str(user_name))
 
                #Else send unencrypted �Invalid username or password�, print info, and terminate
                 else:
@@ -126,7 +126,7 @@ def main():
 
 
                 #End of main loop, close connection and return------------------
-                print(f"Terminating connection with {user_name}")
+                print("Terminating connection with ", str(user_name))
                 connectionSocket.close()
                 return
 
@@ -239,7 +239,7 @@ def send_email(sym_key, connectionSocket):
     #Add recieved date and time
     email.date = datetime.datetime.now()
     #server print
-    print(f"An email from {str(email.from_user)} is sent to {str(email.to_user)} has a conent length of {str(email.content_length)} .")
+    print("An email from " + str(email.from_user) + " is sent to " + str(email.to_user) + " has a conent length of " + str(email.content_length) + ".")
 
     #making values to store the emails in their inboxes
     user_from = str(email.from_user)
@@ -328,8 +328,10 @@ def format_inbox_as_table(emails:list) -> str:
     table = "{0:<8}{1:<15}{2:<30}{3:<15}\n".format("Index", "From", "Date", "Title")
 
     #For each row in the table, format and append
+    i = 0
     for index, email in enumerate(emails):
-        table += f"{index:<8}{email.from_user:<15}{email.date:<30}{email.title:<15}\n"
+        table += "{0:<8}{1:<15}{2:<30}{3:<15}\n".format(i, email.from_user, email.date, email.title)
+        i += 1
 
     return table
 
@@ -345,10 +347,10 @@ class Email:
         pass
 
     def __str__(self):
-        return f"From: {self.from_user}\nTo: {self.to_user}\nDate: {str(self.date)}\nTitle: {self.title}\nContent Length: {self.content_length}\nContent: \n{self.content}"
+        return "From: ",str(self.from_user),"\nTo: ",str(self.to_user),"\nDate: ",str(self.date),"\nTitle: ",(self.title),"\nContent Length: ",str(self.content_length),"\nContent: \n",str(self.content)
 
     def __repr__(self):
-        return f"From: {self.from_user}\nTo: {self.to_user}\nDate: {str(self.date)}\nTitle: {self.title}\nContent Length: {self.content_length}\nContent: \n{self.content}"
+        return "From: ",str(self.from_user),"\nTo: ",str(self.to_user),"\nDate: ",str(self.date),"\nTitle: ",(self.title),"\nContent Length: ",str(self.content_length),"\nContent: \n",str(self.content)
 
     def load_email(self:object, email_path:str):
         #Open the file
