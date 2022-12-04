@@ -14,7 +14,7 @@ from Crypto.Hash import SHA1
 def client():
 
     #Read server public key
-    with open("keys/server_public.pem", "r") as f:
+    with open("server_public.pem", "r") as f:
         server_pub = RSA.import_key(f.read())
 
     # Server Information
@@ -59,10 +59,10 @@ def client():
             connectionSocket.close()
             return
 
-        with open("keys/" + user_name + "_public.pem", "rb") as f:
+        with open(user_name + "_public.pem", "rb") as f:
             client_pub = RSA.import_key(f.read())
 
-        with open("keys/" + user_name + "_private.pem", "rb") as f:
+        with open(user_name + "_private.pem", "rb") as f:
             client_priv = RSA.import_key(f.read())
 
 
@@ -192,16 +192,27 @@ def create_email(sender):
     while (load_file.lower() != 'n' and load_file.lower() != "y"):
         load_file = input("Would you like to load contents from a file?(Y/N) ")
 
-    if (load_file.lower() == 'n'):
-        email.content = input("Enter message contents: ")
-    else:
-        file_name = input("Enter filename: ")
-        try:
-            with open(sender + "/" + file_name, 'r') as f:
-                email.content = f.read()
-        except:
-            print("Invailid File Name")
-            return
+    size_limit = True #while size above 1 million
+    while (size_limit):
+        if (load_file.lower() == 'n'): #get typed message to send
+            email.content = input("Enter message contents: ")
+            if len(str(email.content)) < 1000000: #check size of email
+                size_limit = False
+            else:
+                print("Error, size of the content is past 1,000,000 chars.")
+
+        else: #get file to send
+            file_name = input("Enter filename: ")
+            try:
+                with open(file_name, 'r') as f:
+                    email.content = f.read()
+            except:
+                print("Invailid File Name")
+                return
+            if len(str(email.content)) < 1000000: #check size of email
+                size_limit = False
+            else:
+                print("Error, size of the content is past 1,000,000 chars.")
 
     email.content_length = len(str(email.content))
     return email
